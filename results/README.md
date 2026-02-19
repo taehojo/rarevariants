@@ -42,7 +42,6 @@ Per-gene IR estimation with bootstrap confidence intervals and cross-dataset com
 
 | File | Rows | Description |
 |------|------|-------------|
-| `spearman_correlation.csv` | 74 | R4 per-gene Spearman/point-biserial correlation between AlphaGenome scores and case-enrichment (4 modalities) |
 | `gene_IR_percentile80.csv` | 74 | Gene-level IR at 80th percentile threshold for RNA-seq, CAGE, ChIP-histone |
 | `bootstrap_CI_R4.tsv` | 261 | R4 bootstrap 95% CI for gene × modality IRs (1,000 iterations) |
 | `bootstrap_CI_R5.tsv` | 245 | R5 bootstrap 95% CI for gene × modality IRs (1,000 iterations) |
@@ -114,9 +113,9 @@ Publication-formatted summary tables referenced in the manuscript.
 |-----------|-----|----------|-------|
 | *(root)* | — | 4 | 4 |
 | `r5_replication/` | 10 | — | 10 |
-| `gene_analysis/` | 6 | — | 6 |
+| `gene_analysis/` | 5 | — | 5 |
 | `regression/` | 4 | — | 4 |
 | `sensitivity/` | 4 | 4 | 8 |
 | `regulatory/` | 1 | — | 1 |
 | `tables/` | 8 | — | 8 |
-| **Total** | **33** | **8** | **41** |
+| **Total** | **32** | **8** | **40** |
