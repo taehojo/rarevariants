@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AlphaGenome AD Analysis - 85 Genes</title>
+<script src="viewer_data.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f9fafb;color:#1f2937;font-size:13px}
+.container{max-width:100%;padding:8px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.header{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:relative}
+.hdr-info{border-bottom:1px dashed rgba(255,255,255,.5);cursor:pointer}
+.hdr-info:hover{opacity:.8}
+.info-panel{background:rgba(0,0,0,.85);color:#fff;padding:10px 14px;border-radius:6px;font-size:12px;line-height:1.5;margin-top:6px;width:100%}
+.header h1{font-size:18px;font-weight:700}
+.header .stats{display:flex;gap:16px;font-size:13px}
+.header .stats b{font-weight:700}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;color:#fff;vertical-align:middle}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+h3{font-size:13px;font-weight:700;margin-bottom:8px}
+h4{font-size:12px;font-weight:700;margin-bottom:6px}
+.text-xs{font-size:11px}
+.text-muted{color:#6b7280}
+.text-blue{color:#2563eb}
+.text-green{color:#059669}
+.text-red{color:#dc2626}
+.text-purple{color:#7c3aed}
+.text-orange{color:#ea580c}
+.font-mono{font-family:'Courier New',monospace}
+.font-bold{font-weight:700}
+.mt-2{margin-top:8px}
+.mb-2{margin-bottom:8px}
+
+/* Chromosome map */
+.chr-row{display:flex;align-items:flex-start;margin-bottom:10px}
+.chr-label{width:28px;text-align:right;font-size:8px;font-weight:700;padding-top:2px;flex-shrink:0;margin-right:4px}
+.chr-bar-wrap{flex:1;position:relative}
+.chr-bar{height:16px;background:linear-gradient(90deg,#e5e7eb,#d1d5db);border-radius:8px;position:relative;overflow:visible}
+.chr-bar .gene-dot{position:absolute;top:50%;transform:translate(-50%,-50%);cursor:pointer;transition:all .15s;padding:2px 4px}
+.chr-bar .gene-dot:hover{z-index:20!important}
+.chr-bar .count{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:7px;font-weight:700;color:#4b5563}
+.chr-labels{position:relative;height:14px;margin-top:2px}
+.chr-labels .gene-grp{position:absolute;white-space:nowrap;font-size:8px;transform:translateX(-50%)}
+.chr-labels .gene-grp span.gl{cursor:pointer;padding:1px 3px;border-radius:2px}
+.chr-labels .gene-grp span.gl:hover{background:#e5e7eb;font-weight:700;color:#111}
+.chr-labels .gene-grp span.sep{color:#d1d5db;padding:0 1px}
+.chr-labels span.active{font-weight:700}
+
+/* Filter buttons */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:11px;background:#fff;transition:all .15s}
+.filter-btn:hover{background:#f3f4f6;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.filter-btn.active{border-width:2px}
+.color-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+/* Gene detail */
+.pop-box{background:#f9fafb;border-radius:6px;padding:8px}
+.pop-box .pop-name{font-weight:700;color:#374151;font-size:11px}
+.pop-box .pop-stat{font-size:11px;color:#6b7280}
+
+/* Variant browser tracks */
+.tracks{border:1px solid #d1d5db;background:#fff}
+.track{position:relative;border-bottom:1px solid #e5e7eb}
+.track:last-child{border-bottom:none}
+.track-label{position:absolute;left:4px;top:0;font-size:10px;font-weight:600;z-index:5;width:70px}
+.track-bar:hover div{opacity:1!important;box-shadow:0 0 4px rgba(0,0,0,.4)}
+
+/* Modality heatmap */
+.mod-table{width:100%;border-collapse:collapse;font-size:11px}
+.mod-table th,.mod-table td{padding:3px 6px;text-align:center;border:1px solid #e5e7eb}
+.mod-table th{background:#f3f4f6;font-size:10px;font-weight:600}
+.mod-cell{border-radius:2px;min-width:50px}
+
+/* Variant table */
+table.vtable{width:100%;border-collapse:collapse;font-size:11px}
+table.vtable thead{background:#f3f4f6}
+table.vtable th,table.vtable td{text-align:left;padding:4px 5px;white-space:nowrap}
+table.vtable tbody tr{border-bottom:1px solid #f3f4f6}
+table.vtable tbody tr:hover{background:#f9fafb;cursor:pointer}
+
+/* Pagination */
+.pagination{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:0 4px}
+.pagination button{padding:3px 10px;font-size:11px;background:#e5e7eb;border:none;border-radius:4px;cursor:pointer}
+.pagination button:hover:not(:disabled){background:#d1d5db}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+
+</style>
+</head>
+<body>
+<div class="container" id="app">Loading data...</div>
+
+<script>
+(function(){
+'use strict';
+
+var D = VIEWER_DATA;
+var genes = D.genes;
+var summary = D.summary;
+var MODS = summary.modalities; // ['RNA-seq','CAGE','DNase','Histone','ChIP-TF','Splice-Jn','Splice-Site','Splice-Usage']
+
+var cellTypeColors = {Neuron:'#3b82f6',Microglia:'#dc2626',Astrocyte:'#10b981',Oligodendrocyte:'#f59e0b',Ubiquitous:'#9ca3af'};
+var chrSizes = {1:249,2:242,3:198,4:190,5:182,6:171,7:159,8:146,9:138,10:133,11:135,12:133,13:114,14:107,15:102,16:90,17:83,18:80,19:59,20:64,21:47,22:51};
+var maxChr = 249;
+var POPS = ['NHW','AA','Asian','Hispanic'];
+
+// State
+var state = {
+  selectedGene: null,
+  highlightedCellType: null,
+  variantPage: 0
+};
+
+// Group genes by chromosome
+var genesByChr = {};
+Object.keys(genes).forEach(function(name){
+  var g = genes[name];
+  if(!g.chr) return;
+  if(!genesByChr[g.chr]) genesByChr[g.chr]=[];
+  genesByChr[g.chr].push({name:name, start:g.start, end:g.end, cellType:g.cellType, gvc:g.gvc});
+});
+
+// Overall stats
+var totalVariants=0;
+Object.keys(summary.byCellType).forEach(function(ct){
+  totalVariants += summary.byCellType[ct].variants;
+});
+
+// Pop stats
+var popStats = {};
+POPS.forEach(function(p){popStats[p]={total:0,genes:0}});
+Object.keys(genes).forEach(function(name){
+  var g = genes[name];
+  POPS.forEach(function(p){
+    var pd = g.pops[p];
+    if(pd){popStats[p].total+=pd.total;popStats[p].genes++;}
+  });
+});
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function num(n){return n!=null?Number(n).toLocaleString():'N/A';}
+
+// Per-modality percentile-based color scaling
+var modPctiles = summary.modPctiles || {};
+
+function effectPct(val, mod){
+  // Returns 0-1 indicating how extreme this value is within its modality
+  if(val==null) return -1;
+  var p = modPctiles[mod];
+  if(!p) return val > 0 ? 0.3 : 0; // fallback if no percentile data
+  if(val >= p.p99) return 1.0;
+  if(val >= p.p95) return 0.8 + 0.2*(val - p.p95)/(p.p99 - p.p95 || 1);
+  if(val >= p.p90) return 0.55 + 0.25*(val - p.p90)/(p.p95 - p.p90 || 1);
+  if(val >= p.p75) return 0.25 + 0.3*(val - p.p75)/(p.p90 - p.p75 || 1);
+  if(val >= p.p50) return 0.08 + 0.17*(val - p.p50)/(p.p75 - p.p50 || 1);
+  return 0.04;
+}
+
+// Warm red-orange palette mapped to percentile rank
+// Low values still get visible tint; high values get strong red
+function effectColor(val, mod){
+  if(val==null) return '#ffffff';
+  var t = effectPct(val, mod);
+  if(t < 0) return '#ffffff';
+  // 0.04 -> #f2ddd6 (visible light peach - even low values show)
+  // 0.25 -> #e8b8a6 (warm peach)
+  // 0.55 -> #d4785c (salmon)
+  // 0.80 -> #b83a24 (strong red)
+  // 1.0  -> #7a1a0e (deep red)
+  if(t <= 0.08) return '#f2ddd6';
+  if(t <= 0.25) return lerpColor('#f2ddd6','#e8b8a6',(t-0.08)/0.17);
+  if(t <= 0.55) return lerpColor('#e8b8a6','#d4785c',(t-0.25)/0.30);
+  if(t <= 0.80) return lerpColor('#d4785c','#b83a24',(t-0.55)/0.25);
+  return lerpColor('#b83a24','#7a1a0e',(t-0.80)/0.20);
+}
+
+function lerpColor(a, b, t){
+  t = Math.max(0, Math.min(1, t));
+  var ar=parseInt(a.slice(1,3),16), ag=parseInt(a.slice(3,5),16), ab=parseInt(a.slice(5,7),16);
+  var br=parseInt(b.slice(1,3),16), bg=parseInt(b.slice(3,5),16), bb=parseInt(b.slice(5,7),16);
+  var r=Math.round(ar+(br-ar)*t), g=Math.round(ag+(bg-ag)*t), bl=Math.round(ab+(bb-ab)*t);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+bl).toString(16).slice(1);
+}
+
+function effectText(val, mod){
+  if(val==null) return '#d1d5db';
+  var t = effectPct(val, mod);
+  return t >= 0.6 ? '#fff' : '#374151';
+}
+
+function render(){
+  var g = genes[state.selectedGene];
+  var html = '';
+
+  // Header
+  html += '<div class="header">';
+  html += '<div style="display:flex;align-items:center;gap:8px">';
+  html += '<h1>AlphaGenome AD Analysis</h1>';
+  html += '<span style="font-size:13px;opacity:.9">';
+  html += '<a href="https://adsp.niagads.org/gvc-top-hits-list/" target="_blank" style="color:#fff;text-decoration:underline;text-underline-offset:2px">'+summary.totalGenes+' genes</a>';
+  html += ' &bull; ';
+  html += '<span class="hdr-info" data-info="pop">4 populations</span>';
+  html += ' &bull; ';
+  html += '<span class="hdr-info" data-info="mod">8 modalities</span>';
+  html += '</span>';
+  html += '</div>';
+  html += '<div class="stats"><div><b>'+num(totalVariants)+'</b> <span class="hdr-info" data-info="var">variants</span></div></div>';
+  // Info panels (hidden by default, toggle on click)
+  html += '<div id="info-pop" class="info-panel" style="display:none"><b>4 Populations</b> (N=24,595: 6,296 AD cases, 18,299 controls)';
+  html += '<div style="display:flex;gap:16px;margin-top:4px">';
+  POPS.forEach(function(p){
+    var labels = {NHW:'Non-Hispanic White',AA:'African American',Asian:'Asian',Hispanic:'Hispanic'};
+    html += '<div><b>'+p+'</b><br><span style="opacity:.8">'+labels[p]+': '+num(popStats[p].total)+' variants</span></div>';
+  });
+  html += '</div></div>';
+  html += '<div id="info-mod" class="info-panel" style="display:none"><b>8 AlphaGenome Modalities</b> — sequence-based regulatory effect predictions';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:4px;font-size:12px">';
+  var modDesc = {'RNA-seq':'Transcription level','CAGE':'Transcription start sites','DNase':'Chromatin accessibility','Histone':'Histone modifications','ChIP-TF':'TF binding','Splice-Jn':'Splice junctions','Splice-Site':'Splice site strength','Splice-Usage':'Splice site usage'};
+  MODS.forEach(function(m){ html += '<div><b>'+m+'</b> — '+modDesc[m]+'</div>'; });
+  html += '</div></div>';
+  html += '<div id="info-var" class="info-panel" style="display:none"><b>Rare Variants</b> — MAF &lt; 1%, allele count ≥ 3, top 50 per gene shown</div>';
+  html += '</div>';
+
+  // Chromosome map
+  html += '<div class="card">';
+  html += '<h3 style="margin-bottom:6px">Chromosome Map - '+Object.keys(genes).length+' Genes</h3>';
+
+  html += '<div>';
+  Object.keys(chrSizes).forEach(function(chr){
+    var chrN = Number(chr);
+    var cGenes = genesByChr[chrN];
+    if(!cGenes) return;
+    // Proportional width but clamped: sqrt scaling so small chr aren't too tiny
+    var ratio = chrSizes[chrN]/maxChr;
+    var w = 30 + ratio*70; // range 30%-100%
+    cGenes.sort(function(a,b){return (a.start||0)-(b.start||0)});
+    var mapped = cGenes.map(function(gene){
+      return {name:gene.name,cellType:gene.cellType,gvc:gene.gvc,pos:gene.start?(gene.start/(chrSizes[chrN]*1e6))*100:50};
+    });
+
+    html += '<div class="chr-row"><span class="chr-label">Ch'+chrN+'</span><div class="chr-bar-wrap">';
+    html += '<div class="chr-bar" style="width:'+w.toFixed(1)+'%;position:relative">';
+    mapped.forEach(function(mg){
+      var isSel = state.selectedGene===mg.name;
+      var isHL = state.highlightedCellType===mg.cellType;
+      var color = cellTypeColors[mg.cellType]||'#9ca3af';
+      var ww = isSel?8:(isHL?6:4);
+      var hh = isHL?16:12;
+      var op = (isSel||isHL)?1:0.6;
+      var z = isSel?20:(isHL?18:1);
+      var shadow = isSel?'0 0 3px rgba(0,0,0,.5)':(isHL?'0 0 6px rgba(0,0,0,.3)':'none');
+      html += '<div class="gene-dot" data-action="selectGene" data-gene="'+esc(mg.name)+'" style="left:'+mg.pos.toFixed(2)+'%;z-index:'+z+'">';
+      html += '<div style="width:'+ww+'px;height:'+hh+'px;background:'+color+';opacity:'+op+';border-radius:1px;box-shadow:'+shadow+'"></div>';
+      html += '</div>';
+    });
+    html += '<span class="count">'+cGenes.length+'</span></div>';
+    // Gene name labels: group nearby genes, then merge overlapping groups
+    // Step 1: initial grouping (within 3%)
+    var groups = [];
+    mapped.forEach(function(mg){
+      var added = false;
+      for(var gi=0;gi<groups.length;gi++){
+        if(Math.abs(mg.pos - groups[gi].center) < 3){
+          groups[gi].items.push(mg);
+          var sum=0;
+          groups[gi].items.forEach(function(m){sum+=m.pos});
+          groups[gi].center = sum/groups[gi].items.length;
+          added = true;
+          break;
+        }
+      }
+      if(!added) groups.push({center:mg.pos, items:[mg]});
+    });
+    // Step 2: estimate rendered width per group and merge if overlapping
+    // ~0.55% per character, +0.3% per separator
+    function grpWidth(g){
+      var chars=0;
+      g.items.forEach(function(m){chars+=m.name.length});
+      return chars*0.55 + (g.items.length-1)*0.8;
+    }
+    var merged = true;
+    while(merged){
+      merged = false;
+      for(var i=0;i<groups.length-1;i++){
+        var a=groups[i], b=groups[i+1];
+        var aRight = a.center + grpWidth(a)/2;
+        var bLeft = b.center - grpWidth(b)/2;
+        if(aRight > bLeft - 0.5){
+          // Merge b into a
+          a.items = a.items.concat(b.items);
+          var sum=0;
+          a.items.forEach(function(m){sum+=m.pos});
+          a.center = sum/a.items.length;
+          groups.splice(i+1,1);
+          merged = true;
+          break;
+        }
+      }
+    }
+    html += '<div class="chr-labels" style="width:'+w.toFixed(1)+'%">';
+    groups.forEach(function(grp){
+      html += '<div class="gene-grp" style="left:'+grp.center.toFixed(2)+'%">';
+      grp.items.forEach(function(mg,i){
+        var isSel = state.selectedGene===mg.name;
+        var color = isSel ? (cellTypeColors[mg.cellType]||'#9ca3af') : '#6b7280';
+        var weight = isSel ? '700' : '400';
+        var bg = isSel ? '#eef2ff' : 'transparent';
+        if(i>0) html += '<span class="sep">|</span>';
+        html += '<span class="gl" data-action="selectGene" data-gene="'+esc(mg.name)+'" data-action-hover="highlightDot" style="color:'+color+';font-weight:'+weight+';background:'+bg+'">'+esc(mg.name)+'</span>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // Bottom area: instruction (left) + cell type legend (right)
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-top:8px">';
+  if(!state.selectedGene){
+    html += '<div style="color:#6b7280;font-size:13px;padding:8px 0">Click a gene name or dot above to view its analysis below.</div>';
+  } else {
+    html += '<div></div>';
+  }
+  html += '<div class="filter-row" style="justify-content:flex-end"><span class="text-muted text-xs" style="margin-right:4px">Cell Type:</span>';
+  Object.keys(cellTypeColors).forEach(function(ct){
+    var count = (summary.byCellType[ct] && summary.byCellType[ct].genes) || 0;
+    if(count===0) return;
+    var active = state.highlightedCellType===ct;
+    html += '<span class="filter-btn'+(active?' active':'')+'" data-action="toggleCT" data-ct="'+ct+'" style="'+(active?'border-color:'+cellTypeColors[ct]:'')+'"><span class="color-dot" style="background:'+cellTypeColors[ct]+'"></span>'+ct+' ('+count+')</span>';
+  });
+  html += '</div></div>';
+  html += '</div>';
+
+  // Gene Detail
+  if(state.selectedGene && g){
+    html += '<div class="card" id="gene-detail">';
+    html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+    html += '<h3 style="margin:0">'+esc(state.selectedGene)+' Analysis</h3>';
+    html += '<span class="badge" style="background:'+(cellTypeColors[g.cellType]||'#9ca3af')+'">'+g.cellType+'</span>';
+    html += '<span class="badge" style="background:'+(g.gvc==='Causal'?'#7c3aed':'#64748b')+'">'+g.gvc+'</span>';
+    if(g.ir!=null && isFinite(Number(g.ir))){
+      var irNum = Number(g.ir);
+      var irColor = irNum>1.1?'#dc2626':irNum<0.9?'#3b82f6':'#6b7280';
+      html += '<span class="badge" style="background:'+irColor+'" title="Interaction Ratio">IR: '+irNum.toFixed(3)+'</span>';
+    }
+    html += '<span class="text-xs text-muted">Chr'+g.chr+':'+num(g.start)+'-'+num(g.end)+' | Variants: <b class="text-blue">'+g.nVar+'</b> | Case-enriched: <b class="text-orange">'+(g.pctCE||'N/A')+'%</b> | Median CC: <b>'+(g.medianCC||'N/A')+'</b></span>';
+    html += '</div>';
+
+    // Population boxes
+    html += '<div class="grid-4 mb-2">';
+    POPS.forEach(function(pop){
+      var pd = g.pops[pop]||{total:0};
+      html += '<div class="pop-box"><div class="pop-name">'+pop+'</div>';
+      html += '<div class="pop-stat">Variants: '+pd.total+'</div></div>';
+    });
+    html += '</div>';
+
+    // Variant browser (genomic position view) - ALL 8 modalities
+    var variants = g.variants || [];
+    var displayStart = g.start, displayEnd = g.end;
+    if(variants.length>0){
+      var positions = variants.map(function(v){return v.p}).filter(Boolean);
+      if(positions.length>0){
+        displayStart = Math.min(displayStart||positions[0], Math.min.apply(null,positions));
+        displayEnd = Math.max(displayEnd||positions[0], Math.max.apply(null,positions));
+      }
+    }
+    var range = (displayEnd-displayStart)||1;
+
+    html += '<div class="mt-2"><h4>Genomic Position View</h4>';
+    html += '<div class="font-mono text-xs text-muted mb-2">chr'+g.chr+':'+num(displayStart)+'-'+num(displayEnd)+' &mdash; hover over bars to see variant ID, position, and effect value</div>';
+    html += '<div class="tracks">';
+
+    // Scale track
+    html += '<div class="track" style="height:20px;background:#f9fafb"><span class="track-label" style="width:70px">Scale</span>';
+    html += '<div style="position:absolute;bottom:2px;left:76px;right:4px;height:14px">';
+    [0,25,50,75,100].forEach(function(pct){
+      var pos = displayStart + range*pct/100;
+      html += '<div style="position:absolute;left:'+pct+'%;transform:translateX(-50%);bottom:0;text-align:center"><div style="width:1px;height:5px;background:#6b7280;margin:0 auto"></div><div style="font-size:7px;color:#6b7280;white-space:nowrap">'+(pos/1000).toFixed(0)+'k</div></div>';
+    });
+    html += '</div></div>';
+
+    // Gene body track
+    html += '<div class="track" style="height:18px;background:#eff6ff"><span class="track-label" style="width:70px">Gene</span>';
+    if(g.start && g.end){
+      var gStartPct = ((g.start-displayStart)/range)*100;
+      var gWidth = ((g.end-g.start)/range)*100;
+      html += '<div style="position:absolute;top:6px;left:calc(76px + '+gStartPct+'%*(100% - 80px)/100);height:10px;width:'+Math.max(gWidth,0.5)+'%;max-width:calc(100% - 80px);background:#3b82f6;border-radius:3px;display:flex;align-items:center;justify-content:center"><span style="font-size:8px;font-weight:700;color:#fff">'+esc(state.selectedGene)+'</span></div>';
+    }
+    html += '</div>';
+
+    // All 8 modality tracks - white background, compact height
+    MODS.forEach(function(mod, mi){
+      html += '<div class="track" style="height:32px;background:#fff"><span class="track-label" style="width:70px;font-size:9px">'+mod+'</span>';
+      html += '<div style="position:absolute;top:4px;left:76px;right:4px;bottom:2px">';
+      html += '<div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:#e5e7eb"></div>';
+      variants.forEach(function(v){
+        if(!v.p) return;
+        var relPos = ((v.p-displayStart)/range)*100;
+        var effect = Number(v[mod]);
+        if(!isFinite(effect) || effect===0) return;
+        var pct = effectPct(effect, mod);
+        var barH = Math.max(4, Math.min(pct*24, 24));
+        var color = effectColor(effect, mod);
+        var posStr = 'chr'+g.chr+':'+num(v.p);
+        var tipText = esc(v.id||'')+' | '+posStr+' | '+mod+'='+effect.toFixed(2)+' (p'+Math.round(pct*100)+') | '+esc(v.pop||'');
+        html += '<div class="track-bar" style="position:absolute;left:'+relPos.toFixed(2)+'%;bottom:1px;transform:translateX(-50%);cursor:pointer" title="'+tipText+'">';
+        html += '<div style="width:3px;height:'+barH+'px;background:'+color+';border-radius:1px 1px 0 0"></div></div>';
+      });
+      html += '</div></div>';
+    });
+
+    html += '</div>';
+
+    // Color legend (percentile-based)
+    html += '<div style="display:flex;gap:8px;align-items:center;margin-top:4px;font-size:10px;color:#6b7280">Per-modality percentile: ';
+    [{l:'<p50',c:'#f2ddd6'},{l:'p50-p75',c:'#e8b8a6'},{l:'p75-p90',c:'#d4785c'},{l:'p90-p95',c:'#b83a24'},{l:'p95+',c:'#7a1a0e'}].forEach(function(x){
+      html += '<span style="display:inline-flex;align-items:center;gap:2px"><span style="width:12px;height:12px;background:'+x.c+';border-radius:2px;display:inline-block"></span>'+x.l+'</span>';
+    });
+    html += '</div>';
+    html += '</div>'; // end genomic position view
+
+    // Modality heatmap table (below genomic position view)
+    html += '<div class="mt-2">';
+    html += '<h4>AlphaGenome Effects by Modality (top '+variants.length+' variants)</h4>';
+    html += '<div style="overflow-x:auto"><table class="mod-table"><thead><tr><th>Variant</th><th>Pop</th>';
+    MODS.forEach(function(m){html += '<th>'+m+'</th>'});
+    html += '<th>CC</th><th>Enrichment</th></tr></thead><tbody>';
+
+    // Paginate
+    var perPage = 15;
+    var page = variants.slice(state.variantPage*perPage, (state.variantPage+1)*perPage);
+    var maxPage = Math.max(0, Math.ceil(variants.length/perPage)-1);
+
+    page.forEach(function(v){
+      html += '<tr>';
+      html += '<td class="font-mono" style="font-size:10px">'+esc(v.id||'N/A')+'</td>';
+      html += '<td style="font-size:10px">'+esc(v.pop||'')+'</td>';
+      MODS.forEach(function(m){
+        var val = v[m];
+        var bg = effectColor(val, m);
+        var fg = effectText(val, m);
+        var nVal = Number(val);
+        var display = (val!=null && isFinite(nVal)) ? (nVal>=100?nVal.toFixed(0):nVal.toFixed(2)) : '-';
+        var pct = effectPct(val, m);
+        html += '<td class="mod-cell" style="background:'+bg+';color:'+fg+';font-size:10px;font-weight:'+(pct>=0.55?'600':'400')+'">'+display+'</td>';
+      });
+      var ccVal = (v.cc!=null && isFinite(Number(v.cc))) ? Number(v.cc).toFixed(2) : '-';
+      html += '<td style="font-size:10px">'+ccVal+'</td>';
+      html += '<td style="font-size:10px">'+esc(v.enr||'')+'</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // Pagination
+    html += '<div class="pagination">';
+    html += '<span class="text-xs text-muted">Showing '+(state.variantPage*perPage+1)+'-'+Math.min((state.variantPage+1)*perPage,variants.length)+' of '+variants.length+' variants</span>';
+    html += '<div><button data-action="prevPage" '+(state.variantPage<=0?'disabled':'')+'>Previous</button> ';
+    html += '<button data-action="nextPage" '+(state.variantPage>=maxPage?'disabled':'')+'>Next</button></div>';
+    html += '</div>';
+    html += '</div>'; // end modality heatmap
+
+    html += '</div>'; // end gene detail card
+  }
+
+
+  // Scroll to top button
+  html += '<div style="text-align:center;margin:16px 0 8px"><button data-action="scrollTop" style="padding:6px 20px;font-size:12px;background:#e5e7eb;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;color:#374151">Back to Top</button></div>';
+
+  document.getElementById('app').innerHTML = html;
+}
+
+// Event delegation
+document.getElementById('app').addEventListener('click', function(e){
+  // Info panel toggle
+  var infoEl = e.target.closest('.hdr-info');
+  if(infoEl){
+    var key = infoEl.getAttribute('data-info');
+    var ids = ['pop','mod','var'];
+    ids.forEach(function(id){
+      var el = document.getElementById('info-'+id);
+      if(el) el.style.display = (id===key && el.style.display==='none') ? 'block' : 'none';
+    });
+    return;
+  }
+  // First check: did we click on or inside a gene-related element?
+  var geneEl = e.target.closest('[data-gene]');
+  if(geneEl){
+    var geneName = geneEl.getAttribute('data-gene');
+    if(geneName && genes[geneName]){
+      state.selectedGene = geneName;
+      state.variantPage = 0;
+      render();
+      setTimeout(function(){
+        var detail = document.getElementById('gene-detail');
+        if(detail) detail.scrollIntoView({behavior:'smooth',block:'start'});
+      }, 50);
+      return;
+    }
+  }
+  // Then check other actions
+  var el = e.target.closest('[data-action]');
+  if(!el) return;
+  var action = el.getAttribute('data-action');
+  if(action==='toggleCT'){
+    var ct = el.getAttribute('data-ct');
+    state.highlightedCellType = state.highlightedCellType===ct ? null : ct;
+    render();
+  } else if(action==='scrollTop'){
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else if(action==='prevPage'){
+    if(state.variantPage>0){state.variantPage--;render();}
+  } else if(action==='nextPage'){
+    state.variantPage++;
+    render();
+  }
+});
+
+render();
+document.title = 'AlphaGenome AD - '+summary.totalGenes+' Genes, 8 Modalities';
+
+// Hover on gene label -> highlight corresponding dot
+document.getElementById('app').addEventListener('mouseover', function(e){
+  var el = e.target.closest('[data-gene]');
+  if(!el) return;
+  var name = el.getAttribute('data-gene');
+  if(!name) return;
+  var dots = document.querySelectorAll('.gene-dot[data-gene="'+name+'"]');
+  dots.forEach(function(d){
+    d.style.filter='brightness(1.5) drop-shadow(0 0 4px rgba(0,0,0,.6))';
+    d.style.transform='translate(-50%,-50%) scale(1.8)';
+    d.style.zIndex='25';
+  });
+});
+document.getElementById('app').addEventListener('mouseout', function(e){
+  var el = e.target.closest('[data-gene]');
+  if(!el) return;
+  var name = el.getAttribute('data-gene');
+  if(!name) return;
+  var dots = document.querySelectorAll('.gene-dot[data-gene="'+name+'"]');
+  dots.forEach(function(d){
+    d.style.filter='';
+    d.style.transform='translate(-50%,-50%)';
+    d.style.zIndex='';
+  });
+});
+})();
+</script>
+</body>
+</html>
