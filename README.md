@@ -4,10 +4,6 @@
 
 This repository contains the analysis code and summary-level results for our study investigating the predicted regulatory impacts of rare variants enriched in Alzheimer's disease (AD) within 85 AD-associated genes. We analyzed 1,801,711 rare variants (MAF < 1%) from 24,595 ADSP WGS participants and used [AlphaGenome](https://deepmind.google/technologies/alphagenome/) to predict variant-level regulatory effects across 11 functional modalities, identifying 9,943 unique variants (AC >= 3) mapped to gene regions.
 
-**Authors**: Taeho Jo, Eun Hye Lee, Kwangsik Nho, Andrew J. Saykin
-
-Indiana University School of Medicine, Indianapolis, IN
-
 ## Repository Structure
 
 ```
@@ -15,7 +11,7 @@ rarevariants/
 ├── code/
 │   ├── phase0_data_prep/        # Gene extraction, phenotype processing
 │   ├── phase1_rare_variants/    # PLINK2 rare variant extraction & gene mapping
-│   ├── phase2_alphgenome/       # AlphaGenome API prediction (11 modalities)
+│   ├── phase2_alphgenome/       # AlphaGenome API prediction (11 modalities, developed using alphagenome-mcp)
 │   ├── phase3_plink/            # PLINK frequency analysis (case/control)
 │   ├── phase4_analysis/         # Case-control ratio, enrichment, reviewer analyses
 │   ├── phase6_r5_replication/   # R5 independent replication (N=11,545)
