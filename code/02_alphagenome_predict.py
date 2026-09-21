@@ -24,7 +24,8 @@ except ImportError as e:
 
 from shared_rate_limiter import SharedRateLimiter
 
-os.environ['ALPHAGENOME_API_KEY'] = 'YOUR_ALPHAGENOME_API_KEY'
+if not os.environ.get('ALPHAGENOME_API_KEY'):
+    sys.exit("[ERROR] Set the ALPHAGENOME_API_KEY environment variable before running.")
 
 ALL_MODALITIES = [
     dna_client.OutputType.RNA_SEQ,
