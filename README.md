@@ -4,7 +4,7 @@
 
 ### **https://taehojo.github.io/rarevariants/**
 
-Every rare variant in the study, browsable in the page. No download, no install.
+Every analyzed rare variant in the study, browsable in the page. No download, no install.
 
 [![Chromosome map of the 85 genes](docs/img/browser-chromosome-map.png)](https://taehojo.github.io/rarevariants/)
 
@@ -18,9 +18,10 @@ stratum, a genomic position view showing where the variants fall and how strong
 their predicted effect is in each of the eight modalities, and a sortable table
 of per-variant scores with the case-control ratio and enrichment direction.
 
-The browser holds all 18,412 gene-mapped variant records, that is 85 genes
-across four ancestry strata before the allele-count filter and deduplication
-that define the 9,943-variant analysis set used in the paper.
+The browser holds the 9,943 variants of the analysis set used in the paper
+(allele count of at least 3, deduplicated, with AlphaGenome scores), one
+retained stratum record per variant as in `data/Table_S2_variant_data.csv`.
+`code/11_build_viewer_data.py` builds `docs/viewer_data.js` from that file.
 
 ---
 
@@ -73,8 +74,9 @@ Each script corresponds to one stage of the analysis reported in the manuscript.
 | `06_noncoding_strata.py` | VEP v110 three-strata analysis: all variants, protein-altering excluded, non-coding only | Supplementary Table S22 |
 | `07_r5_assessment.py` | Independent ADSP R5 assessment. Population-proportional control subsampling to the R4 case-to-control ratio of 1:2.9, 100 iterations, seed 42, cases held fixed and controls drawn without replacement; reports the median and the 2.5th-97.5th percentile band as a control-subsampling robustness interval | Supplementary Tables S11, S18 |
 | `08_snatac_concordance.py` | Concordance of predicted DNase effects with measured snATAC-seq accessibility, GSE174367 | Supplementary Table S13; Figure S6 |
-| `09_chromhmm_enrichment.py` | ChromHMM 15-state enrichment across eight brain epigenomes | Supplementary Tables S14a, S14b; Figure S7 |
+| `09_chromhmm_enrichment.py` | ChromHMM 15-state enrichment across eight brain epigenomes | Supplementary Table S14 (panels A and B); Figure S7 |
 | `10_bellenguez_concordance.py` | Direction concordance between per-gene interaction ratios and Bellenguez lead-variant odds ratios | Supplementary Table S20 |
+| `11_build_viewer_data.py` | Data file for the variant browser, built from `data/Table_S2_variant_data.csv` and `data/Table_S1_gene_list.csv` | `docs/viewer_data.js` |
 
 `03_interaction_ratio.py` is the entry point and reproduces the primary result:
 

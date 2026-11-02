@@ -11,7 +11,7 @@ All results derived from the ADSP R4 discovery cohort (N=24,595; 9,943 unique ra
 | File | Rows | Description |
 |------|------|-------------|
 | `cell_type_analysis.csv` | 4 | Cell-type-specific (Neuron, Microglia, Astrocyte, Ubiquitous) mean AlphaGenome scores and CC ratios |
-| `gene_interaction_ratios.csv` | 66 | Gene-level interaction ratios (IR) for 66 AD genes with variant counts |
+| `gene_interaction_ratios.csv` | 65 | Gene-level interaction ratios (Supplementary Table S6) for the 65 genes with at least 10 variants and at least 3 in each group: RNA-seq, variants with a finite case-control ratio, high-effect = score at or above the gene's 90th percentile |
 | `IR_comparison_all_populations.csv` | 8 | Modality-specific IR comparing AD vs. Non-AD gene groups (all populations) |
 | `IR_comparison_pop_stratified.csv` | 8 | Bootstrap 95% CI for modality IRs, AD vs. Non-AD, population-stratified |
 
@@ -86,7 +86,7 @@ ChromHMM-based functional annotation of variant locations.
 
 | File | Rows | Description |
 |------|------|-------------|
-| `chromhmm_enrichment.tsv` | 30 | Enrichment of high-effect variants in ChromHMM states (Roadmap E073, 15-state) × 4 modalities. Enhancer OR=2.60, Bivalent OR=7.87 |
+| `chromhmm_enrichment.tsv` | 30 | Enrichment of high-effect variants in ChromHMM states (Roadmap E073, 15-state; variant positions lifted to GRCh37) × 4 modalities. DNase: active promoter OR=3.25, enhancer OR=0.91 |
 
 ---
 

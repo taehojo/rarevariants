@@ -235,7 +235,7 @@ function render(){
   var modDesc = {'RNA-seq':'Transcription level','CAGE':'Transcription start sites','DNase':'Chromatin accessibility','Histone':'Histone modifications','ChIP-TF':'TF binding','Splice-Jn':'Splice junctions','Splice-Site':'Splice site strength','Splice-Usage':'Splice site usage'};
   MODS.forEach(function(m){ html += '<div><b>'+m+'</b> — '+modDesc[m]+'</div>'; });
   html += '</div></div>';
-  html += '<div id="info-var" class="info-panel" style="display:none"><b>Rare Variants</b> — MAF &lt; 1%, allele count ≥ 3, top 50 per gene shown</div>';
+  html += '<div id="info-var" class="info-panel" style="display:none"><b>Rare Variants</b>: MAF &lt; 1%, allele count ≥ 3, the 9,943 analyzed variants (Supplementary Table S3)</div>';
   html += '</div>';
 
   // Chromosome map
