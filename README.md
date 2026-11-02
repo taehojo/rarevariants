@@ -54,7 +54,7 @@ cell-type category counted once per gene) and `data/cell_type_dictionary.csv`
 first filename is historical and does not correspond to any table number in the
 current manuscript. See `data/README.md`.
 
-`data/Table_S2_variant_data.csv` holds the 9,943 analysed variants with their
+`data/Table_S2_variant_data.csv` holds the 9,943 analyzed variants with their
 AlphaGenome scores and case-control summary statistics, the same table served by
 the browser at https://taehojo.github.io/rarevariants/ . It contains no
 individual-level genotypes.

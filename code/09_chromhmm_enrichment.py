@@ -62,8 +62,9 @@ STATE_LABELS = {
 REGULATORY_STATES = ['1_TssA', '2_TssAFlnk', '3_TxFlnk', '6_EnhG', '7_Enh',
                      '10_TssBiv', '11_BivFlnk', '12_EnhBiv']
 ACTIVE_REGULATORY = ['1_TssA', '2_TssAFlnk', '6_EnhG', '7_Enh']
-TRANSCRIPTION_STATES = ['4_Tx', '5_TxWk']
-REPRESSIVE_STATES = ['9_Het', '13_ReprPC', '14_ReprPCWk']
+TRANSCRIPTION_STATES = ['3_TxFlnk', '4_Tx', '5_TxWk']
+REPRESSIVE_STATES = ['13_ReprPC', '14_ReprPCWk']
+QUIESCENT_STATES = ['15_Quies']
 
 def load_and_prep_variants():
     """Load variants, apply AC>=3 filter, deduplicate."""
@@ -254,9 +255,9 @@ def run_enrichment_analysis():
 
         for group_name, group_states in [
             ('Active Regulatory', ACTIVE_REGULATORY),
-            ('All Regulatory', REGULATORY_STATES),
             ('Transcription', TRANSCRIPTION_STATES),
             ('Repressive', REPRESSIVE_STATES),
+            ('Quiescent/Low', QUIESCENT_STATES),
         ]:
             case_in = annotated[(annotated['enrichment'] == 'case') & (annotated[col].isin(group_states))].shape[0]
             case_out = annotated[(annotated['enrichment'] == 'case') & (~annotated[col].isin(group_states))].shape[0]
